@@ -6,15 +6,8 @@
 
 #include<stdio.h>
 #include<stdlib.h>
-#include<stdbool.h>
 #include<string.h>
-
-//Normal node structure of a singly linked list
-typedef struct Node{
-	int value;
-	struct Node *next;
-}Node;
-
+#include"getAdjList.h"
 /*
 	addNode(int value,Node **head):
 		Input: The insert value and the head pointer of the linked list
@@ -95,7 +88,7 @@ void displayGraph(Node *adj[],int adjLength){
 			Run: ./opt myciel3.col
 
 		Output: displayGraph's output after construction of the adjacency list of the given graph
-*/
+*//*
 int main(int argc,char *argv[]){
 	if(argc<2){	//If argument count is less than 2 then
 		printf("Please Provide the file name\n");
@@ -146,4 +139,4 @@ int main(int argc,char *argv[]){
 	fclose(file);
 
 	return 0;
-}
+}*/
