@@ -1,4 +1,6 @@
 # Graph_Coloring
-Minor Project on the application of evolutionary algorithms on the Graph Coloring Problem
+Minor Project on the Graph Coloring Problem
 <br>
-Include the getAdjList.h to use addNode() function. The header file is to be modified.
+<b>Compile:</b> gcc -o opt selection.c findFitness.c getAdjList.c -lm
+<br>
+<b>Run:</b> ./opt myciel3.colbr>
