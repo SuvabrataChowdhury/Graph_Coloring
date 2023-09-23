@@ -8,6 +8,13 @@
 #include<stdlib.h>
 #include<string.h>
 #include"getAdjList.h"
+
+/*
+typedef struct Node{
+	int value;
+	struct Node *next;
+}Node;
+*/
 /*
 	addNode(int value,Node **head):
 		Input: The insert value and the head pointer of the linked list
@@ -60,7 +67,7 @@ void displayGraph(Node *adj[],int adjLength){
 	Node *ptr=NULL;
 	
 	printf("Displaying the graph\n");
-	for(int i=1;i<adjLength;i++){
+	for(int i=0;i<adjLength;i++){
 		ptr=adj[i];	//Fetch the linked list head pointer of the ith node
 		
 		printf("Neighburs of %d are:\n",i);
@@ -77,66 +84,27 @@ void displayGraph(Node *adj[],int adjLength){
 }
 
 /*
-	Driver Code:
-		Input: To be given from the command line. 
-		After the object file name write the graph's name with extension.
-		Example:
-			Compile: gcc getAdjList.c
-			Run: ./a.out myciel3.col
-		or,
-			Compile: gcc -o opt getAdjList.c
-			Run: ./opt myciel3.col
-
-		Output: displayGraph's output after construction of the adjacency list of the given graph
-*//*
-int main(int argc,char *argv[]){
-	if(argc<2){	//If argument count is less than 2 then
-		printf("Please Provide the file name\n");
-
-		exit(1);
-	}
+	buildGraph():
+		Input: A file pointer to the file containing the graph
+		Output: A adjacency list representation of the input graph
 	
-	//If the git repo is correctly cloned the graphs must be within the same directory.
-	char filePath[100]="GCP_DATASET/";
-	strcat(filePath,argv[1]);	//Hence the relative file is "GCP_DATASET/"+argv[1]
-	
-	FILE *file;
-	file=fopen(filePath,"r");	//Open the file in read mode
-	
-	if(file==NULL){
-		printf("Can not open file\n");
+	[Note: As more than one quantity is associated with a graph (like chromatic number,number 
+	of vertices and number of edges), send the references to the variables knownChromaticNum, numVertices and numEdges
+	to buildGraph for storing purposes]
+*/
 
-		exit(1);
-	}
-	
-	//File has successfully been opened
-
-	//Adjacency list construction begins..
-	int knownChromaticNum,numVertices,numEdges;
-
+void buildGraph(FILE *file,Node *adj[],int *knownChromaticNum,int *numVertices,int *numEdges){
 	//The first line contains 3 quantities which are, known chromatic number, number of vertices and number of edges
-	fscanf(file,"%d %d %d",&knownChromaticNum,&numVertices,&numEdges);	
-	
-	printf("Expected: %d\n",knownChromaticNum);
-	printf("Number of vertices: %d\n",numVertices);
-	printf("Number of edges: %d\n",numEdges);
-	
-	int v1,v2,index=0;
-	
-	Node *adj[1000]={NULL};
-	int adjLength=numVertices+1;
+	fscanf(file,"%d %d %d",knownChromaticNum,numVertices,numEdges);	
+	int v1,v2;
 	
 	//Next line onwords the edge matrix is given
 	while((fscanf(file,"%*s %d %d",&v1,&v2))==2){
 		//As it is an undirected graph the existance of edge (vi,vj) => edge(vj,vi) also exists.
-		addNode(v2,&adj[v1]);
-		addNode(v1,&adj[v2]);
+		addNode(v2-1,&adj[v1-1]);
+		addNode(v1-1,&adj[v2-1]);
 	}
 	//Adjacency list construction is complete
-
-	displayGraph(adj,adjLength);
 	
-	fclose(file);
-
-	return 0;
-}*/
+	return ;
+}

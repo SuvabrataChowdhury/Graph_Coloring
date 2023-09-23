@@ -37,8 +37,6 @@
 #include<string.h>
 #include"getAdjList.h"
 
-#define NUM_CHROMOSOMES 50
-
 Node *frontQ=NULL;
 Node *rearQ=NULL;
 
@@ -127,71 +125,20 @@ void findFitnesses(Node *graph[],int numVertices,int chromosomes[][numVertices],
 	return ;
 }
 
-int main(int argc,char *argv[]){
-	if(argc<2){	//If argument count is less than 2 then
-		printf("Please Provide the file name\n");
-
-		exit(1);
+void findRewards(int rewards[],int fitnesses[],int length){
+	int maxFitness=fitnesses[0];
+	
+	for(int i=1;i<length;i++){
+		if(fitnesses[i]>maxFitness)
+			maxFitness=fitnesses[i];
 	}
 	
-	//If the git repo is correctly cloned the graphs must be within the same directory.
-	char filePath[100]="GCP_DATASET/";
-	strcat(filePath,argv[1]);	//Hence the relative file is "GCP_DATASET/"+argv[1]
+	//printf("%d\n",maxFitness);
 	
-	FILE *file;
-	file=fopen(filePath,"r");	//Open the file in read mode
-	
-	if(file==NULL){
-		printf("Can not open file\n");
-
-		exit(1);
+	for(int i=0;i<length;i++){
+		rewards[i]=maxFitness-fitnesses[i];
 	}
 	
-	//File has successfully been opened
-
-	//Adjacency list construction begins..
-	int knownChromaticNum,numVertices,numEdges;
-
-	//The first line contains 3 quantities which are, known chromatic number, number of vertices and number of edges
-	fscanf(file,"%d %d %d",&knownChromaticNum,&numVertices,&numEdges);	
-	
-	printf("Expected: %d\n",knownChromaticNum);
-	printf("Number of vertices: %d\n",numVertices);
-	printf("Number of edges: %d\n",numEdges);
-	
-	int v1,v2,index=0;
-	
-	Node *adj[1000]={NULL};
-	int adjLength=numVertices+1;
-	
-	//Next line onwords the edge matrix is given
-	while((fscanf(file,"%*s %d %d",&v1,&v2))==2){
-		//As it is an undirected graph the existance of edge (vi,vj) => edge(vj,vi) also exists.
-		addNode(v2,&adj[v1]);
-		addNode(v1,&adj[v2]);
-	}
-	//Adjacency list construction is complete
-
-	displayGraph(adj,adjLength);
-	
-	fclose(file);
-
-	int chromosomes[NUM_CHROMOSOMES][numVertices];
-
-	srand(time(0));
-	for(int i=0;i<NUM_CHROMOSOMES;i++){
-		for(int j=0;j<numVertices;j++){
-			chromosomes[i][j]=rand()%knownChromaticNum+1;
-		}
-	}
-	
-	int fitnesses[NUM_CHROMOSOMES];
-	
-	findFitnesses(adj,numVertices,chromosomes,NUM_CHROMOSOMES,fitnesses);
-	
-	for(int i=0;i<NUM_CHROMOSOMES;i++){
-		printf("The fitness of %dth chromosomes is: %d\n",i,fitnesses[i]);
-	}
-
-	return 0;
+	return ;
 }
+
