@@ -63,7 +63,11 @@ void addNode(int value,Node **head){
 	Note: Start the traversal of array adj[] from index 1 as vertex 0 does not exists in any of the GCP_DATASET graphs.
 	Non existing vertices does not have any neighbour hence, their pointer value is set to NULL.
 */
-void displayGraph(Node *adj[],int adjLength){
+void displayGraph(Node *adj[],int adjLength,int knownChromaticNum,int numVertices,int numEdges){
+	printf("Known Chromatic number: %d\n",knownChromaticNum);
+	printf("Number of Vertices: %d\n",numVertices);
+	printf("Number of Edges: %d\n",numEdges);
+
 	Node *ptr=NULL;
 	
 	printf("Displaying the graph\n");

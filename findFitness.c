@@ -36,6 +36,9 @@
 #include<time.h>
 #include<string.h>
 #include"getAdjList.h"
+#include"chromosome.h"
+
+#define NUM_CHROMOSOMES 100
 
 Node *frontQ=NULL;
 Node *rearQ=NULL;
@@ -85,15 +88,15 @@ int removeQ(){
 	return value;
 }
 
-int findFitness(Node *graph[],int numVertices,int color[]){
+int findConflict(Node *graph[],int numVertices,int color[]){
 	int currentVertex;
-	int fitness = 0;	//It is assumed that the graph is colored correctly at the beginning
+	int conflict = 0;	//It is assumed that the graph is colored correctly at the beginning
 	
-	bool *checked=(bool *)calloc(numVertices+1,sizeof(bool));
+	bool *checked=(bool *)calloc(numVertices,sizeof(bool));
 
 	Node *neighbour = NULL;
 
-	addQ(1);
+	addQ(0);
 
 	while(!isEmptyQ()){	//While there exists vertices to be checked do
 		currentVertex = removeQ();	//set the current vertex as the first vertex in the queue
@@ -103,7 +106,7 @@ int findFitness(Node *graph[],int numVertices,int color[]){
 			
 			while(neighbour != NULL){	//Check all the neighbours of the current vertex for conflicts
 				if(!checked[neighbour->value] && color[neighbour->value] == color[currentVertex]) // Conflict has occurred
-					fitness++;
+					conflict++;
 				
 				addQ(neighbour->value);
 				
@@ -114,31 +117,82 @@ int findFitness(Node *graph[],int numVertices,int color[]){
 		}
 	}
 
-	return fitness;
+	return conflict;
 }
 
-void findFitnesses(Node *graph[],int numVertices,int chromosomes[][numVertices],int numChromosomes,int fitnesses[]){
+void findConflicts(Node *graph[],int numVertices,Chromosome chromosomes[],int numChromosomes){
 	for(int i=0;i<numChromosomes;i++){
-		fitnesses[i] = findFitness(graph,numVertices,chromosomes[i]);
+		chromosomes[i].numConflicts = findConflict(graph,numVertices,chromosomes[i].sequence);
 	}
 
 	return ;
 }
 
-void findRewards(int rewards[],int fitnesses[],int length){
-	int maxFitness=fitnesses[0];
+void findFitnesses(Chromosome chromosomes[],int numChromosomes){
+	int maxConflicts=chromosomes[0].numConflicts;
 	
-	for(int i=1;i<length;i++){
-		if(fitnesses[i]>maxFitness)
-			maxFitness=fitnesses[i];
+	for(int i=1;i<numChromosomes;i++){
+		if(chromosomes[i].numConflicts > maxConflicts)
+			maxConflicts = chromosomes[i].numConflicts;
 	}
 	
 	//printf("%d\n",maxFitness);
 	
-	for(int i=0;i<length;i++){
-		rewards[i]=maxFitness-fitnesses[i];
+	for(int i=0;i<numChromosomes;i++){
+		chromosomes[i].fitness = maxConflicts-chromosomes[i].numConflicts;
 	}
 	
 	return ;
 }
 
+void findConflictsAndFitnesses(Node *graph[],int numVertices,Chromosome chromosomes[],int numChromosomes){
+	findConflicts(graph,numVertices,chromosomes,numChromosomes);
+	findFitnesses(chromosomes,numChromosomes);
+	
+	return ;
+}
+/*
+//Dummy driver code
+int main(int argc,char *argv[]){
+	if(argc<2){	//If argument count is less than 2 then
+		printf("Please Provide the file name\n");
+
+		exit(1);
+	}
+	
+	//If the git repo is correctly cloned the graphs must be within the same directory.
+	char filePath[100]="GCP_DATASET/";
+	strcat(filePath,argv[1]);	//Hence the relative file is "GCP_DATASET/"+argv[1]
+	
+	FILE *file;
+	file=fopen(filePath,"r");	//Open the file in read mode
+	
+	if(file==NULL){
+		printf("Can not open file\n");
+
+		exit(1);
+	}
+	
+	//File has successfully been opened
+
+	int knownChromaticNum,numVertices,numEdges;
+
+	Node *adj[1000]={NULL};
+	int adjLength;
+
+	buildGraph(file,adj,&knownChromaticNum,&numVertices,&numEdges);
+	adjLength=numVertices;
+	displayGraph(adj,adjLength,knownChromaticNum,numVertices,numEdges);
+
+	Chromosome chromosomes[NUM_CHROMOSOMES];
+
+	srand((unsigned)time(NULL));
+	getRandomChromosomes(chromosomes,NUM_CHROMOSOMES,numVertices,knownChromaticNum);
+	
+	findConflictsAndFitnesses(adj,numVertices,chromosomes,NUM_CHROMOSOMES);
+	
+	displayChromosomes(chromosomes,NUM_CHROMOSOMES);
+
+	return 0;
+}
+*/

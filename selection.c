@@ -4,9 +4,104 @@
 #include<time.h>
 #include<string.h>
 #include"getAdjList.h"
+#include"chromosome.h"
 #include"fitness.h"
 
-#define NUM_CHROMOSOMES 100
+#define NUM_CHROMOSOMES 50
+#define CROSS_PROBABILITY 0.7
+#define MUTATE_PROBABILITY 0.03
+
+void swap(int *num1,int *num2){
+	int t=*num1;
+	*num1=*num2;
+	*num2=t;
+
+	return ;
+}
+
+void mutate(Chromosome chromosome,int numGenes){
+	int rand1=0,rand2=0;
+	
+	while(rand1==rand2){
+		rand1=rand()%numGenes;
+		rand2=rand()%numGenes;
+	}
+	
+	swap(&chromosome.sequence[rand1],&chromosome.sequence[rand2]);
+	
+	return ;
+}
+
+void mutateChromosomes(Chromosome chromosomes[],int numChromosomes,double probability){
+	int chromosome;
+	int numMutation=0;
+
+	for(int i=0;i<numChromosomes;i++){
+		double random=1.0*rand()/RAND_MAX;
+		
+		//printf("Rand number: %lf\n",random);
+		chromosome=0;
+
+		if(random<=probability){
+			chromosome=rand()%numChromosomes;
+
+			mutate(chromosomes[chromosome],chromosomes[chromosome].seqLength);
+			numMutation++;
+
+			//printf("Crossover between %d and %d\n",chromosome1,chromosome2);
+		}
+	}
+
+	printf("Mutation happened %d times\n",numMutation);
+
+	return ;
+}
+
+void crossover(Chromosome chromosome1,Chromosome chromosome2,int numGenes){
+	int point1=0;
+	int point2=0;
+
+	while(point1>=point2){
+		point1=rand()%numGenes;
+		point2=rand()%numGenes;
+	}
+	
+	for(int i=point1;i<=point2;i++){
+		swap(&chromosome1.sequence[i],&chromosome2.sequence[i]);
+	}
+	
+	return ;
+}
+
+void crossChromosomes(Chromosome chromosomes[],int numChromosomes,double probability){
+	int index1,index2;
+	int numCrossover=0;
+
+	for(int i=0;i<numChromosomes/2;i++){
+		double random=1.0*rand()/RAND_MAX;
+		
+		//printf("Rand number: %lf\n",random);
+		
+		index1=0;
+		index2=0;
+
+		if(random<=probability){
+			while(index1==index2){
+				index1=rand()%numChromosomes;
+				index2=rand()%numChromosomes;
+			}
+
+			crossover(chromosomes[index1],chromosomes[index2],chromosomes[index1].seqLength);
+			numCrossover++;
+
+			//printf("Crossover between %d and %d\n",index1,index2);
+		}
+	}
+
+	printf("Crossover happened %d times\n",numCrossover);
+
+	return ;
+}
 
 //Comparitive function for sorting purpose
 int cmpFunc(const void *a,const void *b){
@@ -19,15 +114,16 @@ int cmpFunc(const void *a,const void *b){
 		Output: A selection/ mating pool of chromosomes based on their fitness values
 	[Selection is done using Roulette Wheel method]
 */
-void selectChromosomes(int fitnesses[],int selectedChromosomes[],int numChromosomes){
+
+void selectChromosomes(Chromosome chromosomes[],Chromosome matingPool[],int numChromosomes){
 	int sumFitnesses=0;
 	
 	for(int i=0;i<numChromosomes;i++){
-		sumFitnesses+=fitnesses[i];
+		sumFitnesses+=chromosomes[i].fitness;
 	}
-	
+
 	int randSum,chromosome,sum;
-	int selectIndex=0;
+	int index=0;
 
 	for(int i=0;i<numChromosomes;i++){
 		randSum=rand()%(sumFitnesses+1);
@@ -35,15 +131,32 @@ void selectChromosomes(int fitnesses[],int selectedChromosomes[],int numChromoso
 		chromosome=0;
 		sum=0;
 		
-		while(sum<=randSum){
-			sum+=fitnesses[chromosome];
+		while(chromosome<numChromosomes && sum<=randSum){
+			sum+=chromosomes[chromosome].fitness;
 			chromosome++;
 		}
 		
-		selectedChromosomes[selectIndex++]=--chromosome;
+		//Copy the selected chromosome into the mating pool
+		--chromosome;
+		matingPool[index].seqLength=chromosomes[chromosome].seqLength;
+
+		matingPool[index].sequence=calloc(matingPool[index].seqLength,sizeof(int));
+		for(int j=0;j<chromosomes[chromosome].seqLength;j++){
+			matingPool[index].sequence[j]=chromosomes[chromosome].sequence[j];
+		}
+
+		matingPool[index].numConflicts=chromosomes[chromosome].numConflicts;
+		matingPool[index].fitness=chromosomes[chromosome].fitness;
+		index++;
 	}
 	
 	return ;
+}
+
+void display(int arr[],int length){
+	for(int i=0;i<length;i++)
+		printf("%d ",arr[i]);
+	printf("\n");
 }
 
 /*
@@ -56,6 +169,7 @@ void selectChromosomes(int fitnesses[],int selectedChromosomes[],int numChromoso
 			Run: ./opt myciel3.col
 */
 
+//Dummy driver code
 int main(int argc,char *argv[]){
 	if(argc<2){	//If argument count is less than 2 then
 		printf("Please Provide the file name\n");
@@ -84,57 +198,55 @@ int main(int argc,char *argv[]){
 	int adjLength;
 
 	buildGraph(file,adj,&knownChromaticNum,&numVertices,&numEdges);
-	
-	printf("Known Chromatic Number: %d\n",knownChromaticNum);
-	printf("Number of Vertices: %d\n",numVertices);
-	printf("Number of Edges: %d\n",numEdges);
-
 	adjLength=numVertices;
+	displayGraph(adj,adjLength,knownChromaticNum,numVertices,numEdges);
 
-	displayGraph(adj,adjLength);
-	
-	fclose(file);
-
-	int chromosomes[NUM_CHROMOSOMES][numVertices];
+	Chromosome chromosomes[NUM_CHROMOSOMES];
 
 	srand((unsigned)time(NULL));
-	for(int i=0;i<NUM_CHROMOSOMES;i++){
-		for(int j=0;j<numVertices;j++){
-			chromosomes[i][j]=rand()%knownChromaticNum+1;
-		}
-	}
+	getRandomChromosomes(chromosomes,NUM_CHROMOSOMES,numVertices,knownChromaticNum);
 	
-	int fitnesses[NUM_CHROMOSOMES];
+	findConflictsAndFitnesses(adj,numVertices,chromosomes,NUM_CHROMOSOMES);
 	
-	findFitnesses(adj,numVertices,chromosomes,NUM_CHROMOSOMES,fitnesses);
+	displayChromosomes(chromosomes,NUM_CHROMOSOMES);
 	
-	int rewards[NUM_CHROMOSOMES];
+	Chromosome matingPool[NUM_CHROMOSOMES];
 	
-	findRewards(rewards,fitnesses,NUM_CHROMOSOMES);
-	
-	printf("ChromosomeNo Fitness Reword\n");
-	for(int i=0;i<NUM_CHROMOSOMES;i++){
-		printf("%d\t%d\t%d\n",i,fitnesses[i],rewards[i]);
-	}
-	
-	int selectedChromosomes[NUM_CHROMOSOMES];
-	
-	selectChromosomes(rewards,selectedChromosomes,NUM_CHROMOSOMES);
-/*	
-	for(int i=0;i<NUM_CHROMOSOMES;i++){
-		printf("%d ",selectedChromosomes[i]);
-	}
-*/	
+	selectChromosomes(chromosomes,matingPool,NUM_CHROMOSOMES);
 	printf("\n");
 	
-	qsort(selectedChromosomes,NUM_CHROMOSOMES,sizeof(int),cmpFunc);
+	//qsort(selectedChromosomes,NUM_CHROMOSOMES,sizeof(int),cmpFunc);
 	printf("The selected chromosomes are: \n");
 	
-	for(int i=0;i<NUM_CHROMOSOMES;i++){
-		printf("%d ",selectedChromosomes[i]);
+	displayChromosomes(matingPool,NUM_CHROMOSOMES);
+
+	crossChromosomes(matingPool,NUM_CHROMOSOMES,CROSS_PROBABILITY);
+	
+	mutateChromosomes(matingPool,NUM_CHROMOSOMES,MUTATE_PROBABILITY);
+
+	findConflictsAndFitnesses(adj,numVertices,matingPool,NUM_CHROMOSOMES);
+
+	displayChromosomes(matingPool,NUM_CHROMOSOMES);
+
+/*	findFitnesses(adj,numVertices,matingPool,NUM_CHROMOSOMES,fitnesses);
+	findRewards(rewards,fitnesses,NUM_CHROMOSOMES);	
+	
+	int minIndex=0;
+	int maxIndex=0;
+	
+	for(int i=1;i<NUM_CHROMOSOMES;i++){
+		if(fitnesses[i]>fitnesses[maxIndex])
+			maxIndex=i;
+		
+		if(fitnesses[i]<fitnesses[minIndex])
+			minIndex=i;
 	}
 	
-	printf("\n");
-
+	printf("Min fitness: %d Max fitness:%d\n",fitnesses[minIndex],fitnesses[maxIndex]);
+	printf("Fittest Chromosome:\n");
+	display(chromosomes[minIndex],numVertices);
+	printf("Worst Chromosome:\n");
+	display(chromosomes[maxIndex],numVertices);
+*/
 	return 0;
 }
