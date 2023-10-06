@@ -79,7 +79,7 @@
 		to buildGraph for storing purposes]
 	*/
 
-	void buildGraph(FILE *file,Node *adj[],int *knownChromaticNum,int *numVertices,int *numEdges){
+	void buildAdjList(FILE *file,Node *adj[],int *knownChromaticNum,int *numVertices,int *numEdges){
 		//The first line contains 3 quantities which are, known chromatic number, number of vertices and number of edges
 		fscanf(file,"%d %d %d",knownChromaticNum,numVertices,numEdges);	
 		int v1,v2;
@@ -93,5 +93,38 @@
 		//Adjacency list construction is complete
 		
 		return ;
+	}
+	
+	void displayEdges(int edges[][2],int numEdges){
+		for(int i=0;i<numEdges;i++){
+			printf("%d %d\n",edges[i][0],edges[i][1]);
+		}
+	}
+
+	void buildEdgeMatrix(FILE *file,int edges[][2],int *numEdges,int numVertices){
+		int v1,v2;
+		int edgeIndex=0;
+		
+		bool presentEdges[numVertices][numVertices];
+
+		for(int i=0;i<numVertices;i++){
+			for(int j=0;j<numVertices;j++){
+				presentEdges[i][j]=false;
+			}
+		}
+
+		while((fscanf(file,"%*s %d %d",&v1,&v2))==2){
+			if(!presentEdges[v1-1][v2-1]){
+				edges[edgeIndex][0]=v1-1;
+				edges[edgeIndex][1]=v2-1;
+
+				presentEdges[v1-1][v2-1]=true;
+				presentEdges[v2-1][v1-1]=true;
+
+				edgeIndex++;
+			}
+		}
+
+		*numEdges=edgeIndex;
 	}
 #endif

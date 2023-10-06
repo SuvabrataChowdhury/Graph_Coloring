@@ -10,7 +10,7 @@
 #define NUM_CHROMOSOMES 100
 #define CROSS_PROBABILITY 0.7
 #define MUTATE_PROBABILITY 0.03
-#define NUM_GENERATIONS 1000
+#define NUM_GENERATIONS 10000
 
 void displayHavingConflict(Chromosome chromosomes[],int numChromosomes,int targetConflict){
 	for(int i=0;i<numChromosomes;i++){
@@ -75,28 +75,26 @@ int main(int argc,char *argv[]){
 
 	int knownChromaticNum,numVertices,numEdges;
 
-	Node *adj[1000]={NULL};
-	int adjLength;
-
-	buildGraph(file,adj,&knownChromaticNum,&numVertices,&numEdges);
-	adjLength=numVertices;
-	//displayGraph(adj,adjLength,knownChromaticNum,numVertices,numEdges);
+	fscanf(file,"%d %d %d",&knownChromaticNum,&numVertices,&numEdges);
+	int edges[numEdges][2];
+	buildEdgeMatrix(file,edges,&numEdges,numVertices);
+	
+	//displayEdges(edges,numEdges);
 
 	Chromosome chromosomes[NUM_CHROMOSOMES];
 
 	getRandomChromosomes(chromosomes,NUM_CHROMOSOMES,numVertices,knownChromaticNum);
-	
-	findConflictsAndFitnesses(adj,numVertices,chromosomes,NUM_CHROMOSOMES);
-	
+
+	findConflictsAndFitnesses(edges,numEdges,chromosomes,NUM_CHROMOSOMES);
 	//displayChromosomes(chromosomes,NUM_CHROMOSOMES);
-	
-	int maxConflict,minConflict;
+
+	int maxConflict=-1,minConflict=-1;
 	double sumConflict;
 	Chromosome matingPool[NUM_CHROMOSOMES];
 	
 	//displayChromosomes(chromosomes,NUM_CHROMOSOMES);
 	printf("Generation,Min Conflict,Max Conflict,Avg Conflict\n");
-	for(int i=1;i<=NUM_GENERATIONS;i++){
+	for(int i=1;i<=NUM_GENERATIONS && (minConflict!=0 || maxConflict!=0);i++){
 		maxConflict=chromosomes[0].numConflicts;
 		minConflict=chromosomes[0].numConflicts;
 		sumConflict=0.0;
@@ -119,7 +117,7 @@ int main(int argc,char *argv[]){
 		
 		mutateChromosomes(matingPool,NUM_CHROMOSOMES,MUTATE_PROBABILITY);
 
-		findConflictsAndFitnesses(adj,numVertices,matingPool,NUM_CHROMOSOMES);
+		findConflictsAndFitnesses(edges,numEdges,matingPool,NUM_CHROMOSOMES);
 
 		//displayChromosomes(matingPool,NUM_CHROMOSOMES);
 
@@ -129,5 +127,6 @@ int main(int argc,char *argv[]){
 
 		//displayChromosomes(chromosomes,NUM_CHROMOSOMES);
 	}
+
 	return 0;
 }

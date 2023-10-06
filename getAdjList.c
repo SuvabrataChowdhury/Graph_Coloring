@@ -97,7 +97,7 @@ void displayGraph(Node *adj[],int adjLength,int knownChromaticNum,int numVertice
 	to buildGraph for storing purposes]
 */
 
-void buildGraph(FILE *file,Node *adj[],int *knownChromaticNum,int *numVertices,int *numEdges){
+void buildAdjList(FILE *file,Node *adj[],int *knownChromaticNum,int *numVertices,int *numEdges){
 	//The first line contains 3 quantities which are, known chromatic number, number of vertices and number of edges
 	fscanf(file,"%d %d %d",knownChromaticNum,numVertices,numEdges);	
 	int v1,v2;
@@ -112,3 +112,5 @@ void buildGraph(FILE *file,Node *adj[],int *knownChromaticNum,int *numVertices,i
 	
 	return ;
 }
+
+
