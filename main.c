@@ -9,7 +9,7 @@
 
 #define NUM_CHROMOSOMES 100
 #define CROSS_PROBABILITY 0.7
-#define MUTATE_PROBABILITY 0.03
+#define MUTATE_PROBABILITY 0.06
 #define NUM_GENERATIONS 10000
 
 void displayHavingConflict(Chromosome chromosomes[],int numChromosomes,int targetConflict){
@@ -115,7 +115,7 @@ int main(int argc,char *argv[]){
 		
 		crossChromosomes(matingPool,NUM_CHROMOSOMES,CROSS_PROBABILITY);
 		
-		mutateChromosomes(matingPool,NUM_CHROMOSOMES,MUTATE_PROBABILITY);
+		mutateChromosomes(matingPool,NUM_CHROMOSOMES,MUTATE_PROBABILITY,knownChromaticNum);
 
 		findConflictsAndFitnesses(edges,numEdges,matingPool,NUM_CHROMOSOMES);
 

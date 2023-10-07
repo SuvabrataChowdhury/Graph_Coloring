@@ -127,20 +127,33 @@
 		return ;
 	}
 		
-		void mutate(Chromosome chromosome,int numGenes){
-			int rand1=0,rand2=0;
-			
-			while(rand1==rand2){
-				rand1=rand()%numGenes;
-				rand2=rand()%numGenes;
-			}
-			
-			swap(&chromosome.sequence[rand1],&chromosome.sequence[rand2]);
-			
-			return ;
+	void mutate(Chromosome chromosome,int numGenes){
+		int rand1=0,rand2=0;
+		
+		while(chromosome.sequence[rand1]==chromosome.sequence[rand2]){
+			rand1=rand()%numGenes;
+			rand2=rand()%numGenes;
 		}
+		
+		swap(&chromosome.sequence[rand1],&chromosome.sequence[rand2]);
+		
+		return ;
+	}
 
-	void mutateChromosomes(Chromosome chromosomes[],int numChromosomes,double probability){
+	void mutate1(Chromosome chromosome,int numGenes,int chromaticNum){
+		int randIndex=rand()%numGenes;
+		
+		int randGene=chromosome.sequence[randIndex];
+		while(randGene==chromosome.sequence[randIndex]){
+			randGene=rand()%chromaticNum;
+		}
+		
+		chromosome.sequence[randIndex]=randGene;
+
+		return ;
+	}
+
+	void mutateChromosomes(Chromosome chromosomes[],int numChromosomes,double probability,int chromaticNum){
 		int chromosome;
 		int numMutation=0;
 
@@ -152,7 +165,8 @@
 			if(random<=probability){
 				chromosome=rand()%numChromosomes;
 
-				mutate(chromosomes[chromosome],chromosomes[chromosome].seqLength);
+				//mutate(chromosomes[chromosome],chromosomes[chromosome].seqLength);
+				mutate1(chromosomes[chromosome],chromosomes[chromosome].seqLength,chromaticNum);
 				numMutation++;
 			}
 		}
