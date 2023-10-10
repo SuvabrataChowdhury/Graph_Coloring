@@ -37,6 +37,22 @@
 			printf("\t%d\t%d\n",chromosomes[i].numConflicts,chromosomes[i].fitness);
 		}
 	}
+
+	void copyChromosome(Chromosome *srcChromosome,Chromosome *destChromosome){
+		destChromosome->numConflicts=srcChromosome->numConflicts;
+		destChromosome->fitness=srcChromosome->fitness;
+
+		destChromosome->seqLength=srcChromosome->seqLength;
+	
+		destChromosome->sequence=(int *)calloc(destChromosome->seqLength,sizeof(int));
+
+		for(int i=0;i<srcChromosome->seqLength;i++){
+			destChromosome->sequence[i]=srcChromosome->sequence[i];
+		}
+		
+		return ;
+	}
+
 	/*
 		selectChromosomes():
 			Input: The fitnesses of chromosomes and the number of chromosomes
@@ -66,21 +82,25 @@
 			
 			//Copy the selected chromosome into the mating pool
 			--chromosome;
-			matingPool[index].seqLength=chromosomes[chromosome].seqLength;
 
-			matingPool[index].sequence=calloc(matingPool[index].seqLength,sizeof(int));
-			for(int j=0;j<chromosomes[chromosome].seqLength;j++){
-				matingPool[index].sequence[j]=chromosomes[chromosome].sequence[j];
-			}
-
-			matingPool[index].numConflicts=chromosomes[chromosome].numConflicts;
-			matingPool[index].fitness=chromosomes[chromosome].fitness;
+			copyChromosome(&chromosomes[chromosome],&matingPool[index]);
 			index++;
 		}
 		
 		return ;
 	}
 		
+	void eliminateChromosomes(Chromosome matingPool[],Chromosome fittestChromosome,int numChromosomes,int toleranceConflict,double replaceProbability){
+		
+		for(int i=0;i<numChromosomes;i++){
+			if(matingPool[i].numConflicts>toleranceConflict){
+				if((1.0*rand()/RAND_MAX)<replaceProbability){
+					copyChromosome(&fittestChromosome,&matingPool[i]);
+				}
+			}
+		}
+	}
+
 	void crossover(Chromosome chromosome1,Chromosome chromosome2,int numGenes){
 		int point1=0;
 		int point2=0;
@@ -145,7 +165,7 @@
 		
 		int randGene=chromosome.sequence[randIndex];
 		while(randGene==chromosome.sequence[randIndex]){
-			randGene=rand()%chromaticNum;
+			randGene=rand()%chromaticNum+1;
 		}
 		
 		chromosome.sequence[randIndex]=randGene;

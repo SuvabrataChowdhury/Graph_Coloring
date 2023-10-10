@@ -24,20 +24,6 @@ void displayHavingConflict(Chromosome chromosomes[],int numChromosomes,int targe
 	}
 }
 
-void copyChromosome(Chromosome *srcChromosome,Chromosome *destChromosome){
-	destChromosome->numConflicts=srcChromosome->numConflicts;
-	destChromosome->fitness=srcChromosome->fitness;
-
-	destChromosome->seqLength=srcChromosome->seqLength;
-	
-	destChromosome->sequence=(int *)calloc(destChromosome->seqLength,sizeof(int));
-	for(int i=0;i<srcChromosome->seqLength;i++){
-		destChromosome->sequence[i]=srcChromosome->sequence[i];
-	}
-	
-	return ;
-}
-
 /*
 	Driver Code:
 		Give input from the command line. 
@@ -88,45 +74,69 @@ int main(int argc,char *argv[]){
 	findConflictsAndFitnesses(edges,numEdges,chromosomes,NUM_CHROMOSOMES);
 	//displayChromosomes(chromosomes,NUM_CHROMOSOMES);
 
-	int maxConflict=-1,minConflict=-1;
-	double sumConflict;
+	int maxConflictIndex=0,minConflictIndex=0,minConflict=-1,maxConflict=-1;
+	double sumConflict,avgConflict;
+
+	int toleranceConflict=numEdges;
+	double replaceProbability=0.0;
+
 	Chromosome matingPool[NUM_CHROMOSOMES];
 	
 	//displayChromosomes(chromosomes,NUM_CHROMOSOMES);
 	printf("Generation,Min Conflict,Max Conflict,Avg Conflict\n");
-	for(int i=1;i<=NUM_GENERATIONS && (minConflict!=0 || maxConflict!=0);i++){
-		maxConflict=chromosomes[0].numConflicts;
-		minConflict=chromosomes[0].numConflicts;
+	for(int i=1;i<=NUM_GENERATIONS && (minConflict!=0 || avgConflict>0.2);i++){
+		maxConflictIndex=0;
+		minConflictIndex=0;
 		sumConflict=0.0;
 
 		for(int j=0;j<NUM_CHROMOSOMES;j++){
-			if(chromosomes[j].numConflicts<minConflict)
-				minConflict=chromosomes[j].numConflicts;
+			if(chromosomes[j].numConflicts<chromosomes[minConflictIndex].numConflicts)
+				minConflictIndex=j;
 			
-			if(chromosomes[j].numConflicts>maxConflict)
-				maxConflict=chromosomes[j].numConflicts;
+			if(chromosomes[j].numConflicts>chromosomes[maxConflictIndex].numConflicts)
+				maxConflictIndex=j;
 
 			sumConflict+=chromosomes[j].numConflicts;
 		}
+		
+		minConflict=chromosomes[minConflictIndex].numConflicts;
+		maxConflict=chromosomes[maxConflictIndex].numConflicts;
+		avgConflict=sumConflict/NUM_CHROMOSOMES;
 
-		printf("%d,%d,%d,%lf\n",i,minConflict,maxConflict,sumConflict/NUM_CHROMOSOMES);
-
+		printf("%d,%d,%d,%lf\n",i,minConflict,maxConflictIndex,avgConflict);
+		
+		//Natural Selection begins
+		//Select fittest chromosomes
 		selectChromosomes(chromosomes,matingPool,NUM_CHROMOSOMES);
 		
+		//Filter out the worst chromosomes
+		replaceProbability=(1/NUM_GENERATIONS) * i;
+		toleranceConflict/=2;
+		eliminateChromosomes(matingPool,chromosomes[minConflictIndex],NUM_CHROMOSOMES,toleranceConflict,replaceProbability);
+		
+		//Perform crossover to create next generations
 		crossChromosomes(matingPool,NUM_CHROMOSOMES,CROSS_PROBABILITY);
 		
+		//Mutate newly born chromosomes to maintain diversity
 		mutateChromosomes(matingPool,NUM_CHROMOSOMES,MUTATE_PROBABILITY,knownChromaticNum);
-
+		
+		//Update the children's conflicts and fitnesses as crossover and mutation has happened
 		findConflictsAndFitnesses(edges,numEdges,matingPool,NUM_CHROMOSOMES);
 
 		//displayChromosomes(matingPool,NUM_CHROMOSOMES);
-
+		
+		//Copy each chromosomes back to the original pool to prepare for next generations
 		for(int j=0;j<NUM_CHROMOSOMES;j++){
 			copyChromosome(&matingPool[j],&chromosomes[j]);
 		}
 
 		//displayChromosomes(chromosomes,NUM_CHROMOSOMES);
 	}
-
+/*
+	for(int i=0;i<numVertices;i++){
+		printf("%d ",chromosomes[minConflictIndex].sequence[i]);
+	}
+	printf("\n");
+*/
 	return 0;
 }
