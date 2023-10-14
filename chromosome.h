@@ -15,6 +15,20 @@
 
 		return ;
 	}
+	
+	void copyChromosome(Chromosome *srcChromosome,Chromosome *destChromosome){
+		destChromosome->numConflicts=srcChromosome->numConflicts;
+		destChromosome->fitness=srcChromosome->fitness;
+
+		destChromosome->seqLength=srcChromosome->seqLength;
+		
+		destChromosome->sequence=(int *)calloc(destChromosome->seqLength,sizeof(int));
+		for(int i=0;i<srcChromosome->seqLength;i++){
+			destChromosome->sequence[i]=srcChromosome->sequence[i];
+		}
+		
+		return ;
+	}
 		//Initiates each chromosomes in the given array
 	void getRandomChromosomes(Chromosome chromosomes[],int numChromosomes,int numVertices,int highestColor){
 		for(int i=0;i<numChromosomes;i++){
@@ -66,15 +80,8 @@
 			
 			//Copy the selected chromosome into the mating pool
 			--chromosome;
-			matingPool[index].seqLength=chromosomes[chromosome].seqLength;
 
-			matingPool[index].sequence=calloc(matingPool[index].seqLength,sizeof(int));
-			for(int j=0;j<chromosomes[chromosome].seqLength;j++){
-				matingPool[index].sequence[j]=chromosomes[chromosome].sequence[j];
-			}
-
-			matingPool[index].numConflicts=chromosomes[chromosome].numConflicts;
-			matingPool[index].fitness=chromosomes[chromosome].fitness;
+			copyChromosome(&chromosomes[chromosome],&matingPool[index]);
 			index++;
 		}
 		

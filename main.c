@@ -24,19 +24,6 @@ void displayHavingConflict(Chromosome chromosomes[],int numChromosomes,int targe
 	}
 }
 
-void copyChromosome(Chromosome *srcChromosome,Chromosome *destChromosome){
-	destChromosome->numConflicts=srcChromosome->numConflicts;
-	destChromosome->fitness=srcChromosome->fitness;
-
-	destChromosome->seqLength=srcChromosome->seqLength;
-	
-	destChromosome->sequence=(int *)calloc(destChromosome->seqLength,sizeof(int));
-	for(int i=0;i<srcChromosome->seqLength;i++){
-		destChromosome->sequence[i]=srcChromosome->sequence[i];
-	}
-	
-	return ;
-}
 
 /*
 	Driver Code:
