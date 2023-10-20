@@ -12,6 +12,22 @@
 #define MUTATE_PROBABILITY 0.06
 #define NUM_GENERATIONS 10000
 
+clock_t start,end;
+
+int getChromaticNumChromosome(Chromosome chromosome){
+	if(chromosome.numConflicts==0){
+		int max=0;
+
+		for(int i=0;i<chromosome.seqLength;i++){
+			if(max<chromosome.sequence[i])
+				max=chromosome.sequence[i];
+		}
+
+		return max;
+	}
+	return -1;
+}
+
 void displayHavingConflict(Chromosome chromosomes[],int numChromosomes,int targetConflict){
 	for(int i=0;i<numChromosomes;i++){
 		if(chromosomes[i].numConflicts==targetConflict){
@@ -23,7 +39,6 @@ void displayHavingConflict(Chromosome chromosomes[],int numChromosomes,int targe
 		}
 	}
 }
-
 
 /*
 	Driver Code:
@@ -59,7 +74,7 @@ int main(int argc,char *argv[]){
 	}
 	
 	//File has successfully been opened
-
+	start=clock();
 	int knownChromaticNum,numVertices,numEdges;
 
 	fscanf(file,"%d %d %d",&knownChromaticNum,&numVertices,&numEdges);
@@ -75,28 +90,23 @@ int main(int argc,char *argv[]){
 	findConflictsAndFitnesses(edges,numEdges,chromosomes,NUM_CHROMOSOMES);
 	//displayChromosomes(chromosomes,NUM_CHROMOSOMES);
 
-	int maxConflict=-1,minConflict=-1;
-	double sumConflict;
+	int minConflictIndex=0;
 	Chromosome matingPool[NUM_CHROMOSOMES];
 	
 	//displayChromosomes(chromosomes,NUM_CHROMOSOMES);
-	printf("Generation,Min Conflict,Max Conflict,Avg Conflict\n");
-	for(int i=1;i<=NUM_GENERATIONS && (minConflict!=0 || maxConflict!=0);i++){
-		maxConflict=chromosomes[0].numConflicts;
-		minConflict=chromosomes[0].numConflicts;
-		sumConflict=0.0;
+	//printf("Generation,Min Conflict,Max Conflict,Avg Conflict\n");
+
+	int i=1;
+	for(i=1;i<=NUM_GENERATIONS;i++){
+		minConflictIndex=0;
 
 		for(int j=0;j<NUM_CHROMOSOMES;j++){
-			if(chromosomes[j].numConflicts<minConflict)
-				minConflict=chromosomes[j].numConflicts;
-			
-			if(chromosomes[j].numConflicts>maxConflict)
-				maxConflict=chromosomes[j].numConflicts;
-
-			sumConflict+=chromosomes[j].numConflicts;
+			if(chromosomes[j].numConflicts<chromosomes[minConflictIndex].numConflicts)
+				minConflictIndex=j;
 		}
 
-		printf("%d,%d,%d,%lf\n",i,minConflict,maxConflict,sumConflict/NUM_CHROMOSOMES);
+		if(chromosomes[minConflictIndex].numConflicts==0)
+			break;
 
 		selectChromosomes(chromosomes,matingPool,NUM_CHROMOSOMES);
 		
@@ -106,14 +116,16 @@ int main(int argc,char *argv[]){
 
 		findConflictsAndFitnesses(edges,numEdges,matingPool,NUM_CHROMOSOMES);
 
-		//displayChromosomes(matingPool,NUM_CHROMOSOMES);
-
 		for(int j=0;j<NUM_CHROMOSOMES;j++){
 			copyChromosome(&matingPool[j],&chromosomes[j]);
 		}
-
-		//displayChromosomes(chromosomes,NUM_CHROMOSOMES);
 	}
+
+	end=clock();
+	
+	printf("Chomatic_Num Iteration_Num Time_Taken\n");
+	printf("%d %d %lf\n",getChromaticNumChromosome(chromosomes[minConflictIndex]),i,(double)(end-start)/CLOCKS_PER_SEC);
+	//displayHavingConflict(chromosomes,NUM_CHROMOSOMES,0);
 
 	return 0;
 }

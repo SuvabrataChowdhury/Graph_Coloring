@@ -15,7 +15,12 @@
 
 		return ;
 	}
-	
+
+	/*
+		copyChromosome():
+			Input: The source and destination chromosomes.
+			Output: A deep copy of the source chromosome to the destination chromosome
+	*/
 	void copyChromosome(Chromosome *srcChromosome,Chromosome *destChromosome){
 		destChromosome->numConflicts=srcChromosome->numConflicts;
 		destChromosome->fitness=srcChromosome->fitness;
@@ -29,7 +34,8 @@
 		
 		return ;
 	}
-		//Initiates each chromosomes in the given array
+	
+	//Initiates each chromosomes in the given array
 	void getRandomChromosomes(Chromosome chromosomes[],int numChromosomes,int numVertices,int highestColor){
 		for(int i=0;i<numChromosomes;i++){
 			chromosomes[i].seqLength=numVertices;
@@ -51,6 +57,7 @@
 			printf("\t%d\t%d\n",chromosomes[i].numConflicts,chromosomes[i].fitness);
 		}
 	}
+	
 	/*
 		selectChromosomes():
 			Input: The fitnesses of chromosomes and the number of chromosomes
@@ -87,7 +94,12 @@
 		
 		return ;
 	}
-		
+	
+	/*
+		crossover():
+			Input: Two chromosomes and their length i.e., number of genes
+			Output: A two point crossover between the given chromosomes to produce two childrens
+	*/
 	void crossover(Chromosome chromosome1,Chromosome chromosome2,int numGenes){
 		int point1=0;
 		int point2=0;
@@ -104,6 +116,11 @@
 		return ;
 	}
 
+	/*
+		crossChromosomes():
+			Input: A list of chromosomes, the length of the list i.e., the number of chromosomes and crossover probability
+			Output: Crossover between all the chromosomes based on the chrossover probability
+	*/
 	void crossChromosomes(Chromosome chromosomes[],int numChromosomes,double probability){
 		int index1,index2;
 		int numCrossover=0;
@@ -125,41 +142,35 @@
 				crossover(chromosomes[index1],chromosomes[index2],chromosomes[index1].seqLength);
 				numCrossover++;
 
-				//printf("Crossover between %d and %d\n",index1,index2);
 			}
 		}
 
-		//printf("Crossover happened %d times\n",numCrossover);
-
 		return ;
 	}
-		
-	void mutate(Chromosome chromosome,int numGenes){
-		int rand1=0,rand2=0;
-		
-		while(chromosome.sequence[rand1]==chromosome.sequence[rand2]){
-			rand1=rand()%numGenes;
-			rand2=rand()%numGenes;
-		}
-		
-		swap(&chromosome.sequence[rand1],&chromosome.sequence[rand2]);
-		
-		return ;
-	}
-
-	void mutate1(Chromosome chromosome,int numGenes,int chromaticNum){
+	
+	/*
+		mutate():
+			Input: A chromosome, length of that chromosome and the highest order gene
+			Output: A single point change in the sequence of the chromosome
+	*/
+	void mutate(Chromosome chromosome,int numGenes,int highestGene){
 		int randIndex=rand()%numGenes;
 		
 		int randGene=chromosome.sequence[randIndex];
 		while(randGene==chromosome.sequence[randIndex]){
-			randGene=rand()%chromaticNum;
+			randGene=rand()%highestGene+1;
 		}
 		
 		chromosome.sequence[randIndex]=randGene;
 
 		return ;
 	}
-
+	
+	/*
+		mutateChromosomes():
+			Input: A list of chromosomes, length of that list, mutation probability, known chromatic number
+			Output: Mutation of the chromosomes based on the mutation probability
+	*/
 	void mutateChromosomes(Chromosome chromosomes[],int numChromosomes,double probability,int chromaticNum){
 		int chromosome;
 		int numMutation=0;
@@ -172,13 +183,10 @@
 			if(random<=probability){
 				chromosome=rand()%numChromosomes;
 
-				//mutate(chromosomes[chromosome],chromosomes[chromosome].seqLength);
-				mutate1(chromosomes[chromosome],chromosomes[chromosome].seqLength,chromaticNum);
+				mutate(chromosomes[chromosome],chromosomes[chromosome].seqLength,chromaticNum);
 				numMutation++;
 			}
 		}
-
-		//printf("Mutation happened %d times\n",numMutation);
 
 		return ;
 	}
