@@ -30,7 +30,7 @@
 		//printf("%d\n",maxFitness);
 		
 		for(int i=0;i<numChromosomes;i++){
-			chromosomes[i].fitness = maxConflicts-chromosomes[i].numConflicts;
+			chromosomes[i].fitness = 1-(1.0*chromosomes[i].numConflicts/maxConflicts);
 		}
 		
 		return ;

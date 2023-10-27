@@ -5,7 +5,7 @@
 		int seqLength;	//Length of the sequence
 		int *sequence;	//An array of length seqLength. Defines a coloration of the graph
 		int numConflicts;	//number of conflicting edges for the given coloring
-		int fitness;	//fitness based on the number of conflicting edges
+		double fitness;	//fitness based on the number of conflicting edges
 	}Chromosome;
 	
 	void swap(int *num1,int *num2){
@@ -34,7 +34,7 @@
 				printf("%d ",chromosomes[i].sequence[j]);
 			}
 
-			printf("\t%d\t%d\n",chromosomes[i].numConflicts,chromosomes[i].fitness);
+			printf("\t%d\t%lf\n",chromosomes[i].numConflicts,chromosomes[i].fitness);
 		}
 	}
 
@@ -53,12 +53,35 @@
 		return ;
 	}
 
+	void selection(Chromosome chromosomes[],Chromosome matingPool[],int numChromosomes,double eliProbability,double toleranceFitness){
+		int index=0,i=0;
+		double r=0.0;
+
+		while(index!=numChromosomes){
+			if(chromosomes[i].fitness<toleranceFitness){
+				r=1.0*rand()/RAND_MAX;
+
+				if(r<(1-eliProbability)){
+					copyChromosome(&chromosomes[i],&matingPool[index]);
+					index++;
+				}
+			}
+			else{
+					copyChromosome(&chromosomes[i],&matingPool[index]);
+					index++;
+			}
+
+			i=(i+1)%numChromosomes;
+		}
+	}
+
 	/*
 		selectChromosomes():
 			Input: The fitnesses of chromosomes and the number of chromosomes
 			Output: A selection/ mating pool of chromosomes based on their fitness values
 		[Selection is done using Roulette Wheel method]
 	*/
+	/*
 	void selectChromosomes(Chromosome chromosomes[],Chromosome matingPool[],int numChromosomes){
 		int sumFitnesses=0;
 		
@@ -100,7 +123,7 @@
 			}
 		}
 	}
-
+*/
 	void crossover(Chromosome chromosome1,Chromosome chromosome2,int numGenes){
 		int point1=0;
 		int point2=0;

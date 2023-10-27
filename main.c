@@ -75,16 +75,16 @@ int main(int argc,char *argv[]){
 	//displayChromosomes(chromosomes,NUM_CHROMOSOMES);
 
 	int maxConflictIndex=0,minConflictIndex=0,minConflict=-1,maxConflict=-1;
-	double sumConflict,avgConflict;
+	double sumConflict,avgConflict=0.0;
 
-	int toleranceConflict=numEdges;
-	double replaceProbability=0.0;
+	double toleranceFitness=0.0;
+	double eliProbability=0.0;
 
 	Chromosome matingPool[NUM_CHROMOSOMES];
 	
 	//displayChromosomes(chromosomes,NUM_CHROMOSOMES);
 	printf("Generation,Min Conflict,Max Conflict,Avg Conflict\n");
-	for(int i=1;i<=NUM_GENERATIONS && (minConflict!=0 || avgConflict>0.2);i++){
+	for(int i=1;i<=NUM_GENERATIONS && (minConflict!=0);i++){
 		maxConflictIndex=0;
 		minConflictIndex=0;
 		sumConflict=0.0;
@@ -103,17 +103,15 @@ int main(int argc,char *argv[]){
 		maxConflict=chromosomes[maxConflictIndex].numConflicts;
 		avgConflict=sumConflict/NUM_CHROMOSOMES;
 
-		printf("%d,%d,%d,%lf\n",i,minConflict,maxConflictIndex,avgConflict);
+		printf("%d,%d,%d,%lf\n",i,minConflict,maxConflict,avgConflict);
 		
 		//Natural Selection begins
 		//Select fittest chromosomes
-		selectChromosomes(chromosomes,matingPool,NUM_CHROMOSOMES);
+		selection(chromosomes,matingPool,NUM_CHROMOSOMES,eliProbability,toleranceFitness);
 		
-		//Filter out the worst chromosomes
-		replaceProbability=(1/NUM_GENERATIONS) * i;
-		toleranceConflict/=2;
-		eliminateChromosomes(matingPool,chromosomes[minConflictIndex],NUM_CHROMOSOMES,toleranceConflict,replaceProbability);
-		
+		eliProbability=1.0*i/NUM_GENERATIONS;
+		toleranceFitness=1.0*i/NUM_GENERATIONS;
+
 		//Perform crossover to create next generations
 		crossChromosomes(matingPool,NUM_CHROMOSOMES,CROSS_PROBABILITY);
 		
