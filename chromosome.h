@@ -54,13 +54,19 @@
 	}
 
 	void selection(Chromosome chromosomes[],Chromosome matingPool[],int numChromosomes,double eliProbability,double toleranceFitness){
+		//index is the insertion location at the matingPool and i is index of chromosomes
 		int index=0,i=0;
-		double r=0.0;
-
+		double r=0.0;	//r is a random variable
+		
+		//while we have not filled the mating pool do,
 		while(index!=numChromosomes){
+			//if the ith chromosomes fitness is less than the tolerance fitness, it may get eliminated
+			//based on the elimination probability
 			if(chromosomes[i].fitness<toleranceFitness){
 				r=1.0*rand()/RAND_MAX;
-
+				
+				//If randomly generated value is less than the selection probability,
+				//i.e. 1-P(Elimination), then select the chromosome.
 				if(r<(1-eliProbability)){
 					copyChromosome(&chromosomes[i],&matingPool[index]);
 					index++;
@@ -70,6 +76,11 @@
 					copyChromosome(&chromosomes[i],&matingPool[index]);
 					index++;
 			}
+			
+			//After every cycle through the chromosome pool lower the dificulty level
+			//so that the unfilled positions in the mating pool gets filled
+			if((i+1)==numChromosomes)
+				eliProbability/=2;
 
 			i=(i+1)%numChromosomes;
 		}

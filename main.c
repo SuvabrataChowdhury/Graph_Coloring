@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<stdbool.h>
+#include<math.h>
 #include<time.h>
 #include<string.h>
 #include"getAdjList.h"
@@ -109,7 +110,9 @@ int main(int argc,char *argv[]){
 		//Select fittest chromosomes
 		selection(chromosomes,matingPool,NUM_CHROMOSOMES,eliProbability,toleranceFitness);
 		
-		eliProbability=1.0*i/NUM_GENERATIONS;
+		//Increase the elimination probability so that the selection of bad chromosomes become more strict.
+		eliProbability=1.0/(1+exp(-i));
+		//Increase the tolerance fitness to guide the chromosomes towards fitness 1.
 		toleranceFitness=1.0*i/NUM_GENERATIONS;
 
 		//Perform crossover to create next generations
