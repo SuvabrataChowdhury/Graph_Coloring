@@ -25,6 +25,21 @@ void displayHavingConflict(Chromosome chromosomes[],int numChromosomes,int targe
 	}
 }
 
+double straightLine(int gen){
+	return 1.0*gen/NUM_GENERATIONS;
+}
+
+double trainingFunc1(int i){
+	if((fabs(cos(0.1*i))-fabs(cos(0.1*(i-1))))>0)
+		return fabs(cos(0.1*i));
+	else
+		return fabs(sin(0.1*i));
+}
+
+double trainingFunc2(int gen){
+	return 2*(sin(1.0*gen/NUM_GENERATIONS)-(sin(2*gen/NUM_GENERATIONS)/2)+(sin(3*gen/NUM_GENERATIONS)/3));
+}
+
 /*
 	Driver Code:
 		Give input from the command line. 
@@ -108,12 +123,12 @@ int main(int argc,char *argv[]){
 		
 		//Natural Selection begins
 		//Select fittest chromosomes
-		selection(chromosomes,matingPool,NUM_CHROMOSOMES,eliProbability,toleranceFitness);
+		selection(chromosomes,matingPool,NUM_CHROMOSOMES,1,toleranceFitness);
 		
 		//Increase the elimination probability so that the selection of bad chromosomes become more strict.
-		eliProbability=1.0/(1+exp(-i));
+		//eliProbability=trainingFunc2(i);
 		//Increase the tolerance fitness to guide the chromosomes towards fitness 1.
-		toleranceFitness=1.0*i/NUM_GENERATIONS;
+		toleranceFitness=straightLine(i);
 
 		//Perform crossover to create next generations
 		crossChromosomes(matingPool,NUM_CHROMOSOMES,CROSS_PROBABILITY);

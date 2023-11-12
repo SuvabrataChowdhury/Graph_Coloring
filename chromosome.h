@@ -55,7 +55,7 @@
 
 	void selection(Chromosome chromosomes[],Chromosome matingPool[],int numChromosomes,double eliProbability,double toleranceFitness){
 		//index is the insertion location at the matingPool and i is index of chromosomes
-		int index=0,i=0;
+		int index=0,i=0,setBacks=0;
 		double r=0.0;	//r is a random variable
 		
 		//while we have not filled the mating pool do,
@@ -79,8 +79,10 @@
 			
 			//After every cycle through the chromosome pool lower the dificulty level
 			//so that the unfilled positions in the mating pool gets filled
-			if((i+1)==numChromosomes)
-				eliProbability/=2;
+			if((i+1)==numChromosomes){
+				setBacks++;
+				eliProbability=exp(-0.1*setBacks);
+			}
 
 			i=(i+1)%numChromosomes;
 		}
